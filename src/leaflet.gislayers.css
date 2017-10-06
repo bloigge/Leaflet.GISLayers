@@ -1,0 +1,28 @@
+.leaflet-gislayers-group {
+  padding-left: 17px;
+}
+
+/* .leaflet-gislayers-group * {
+  pointer-events: none;
+} */
+
+.leaflet-gislayers-layer {
+  padding-left: 17px;
+  position: relative;
+  /* border-left: 1px dotted black; */
+}
+
+.tree-guide::after {
+    /* content: '';
+    width: 17px;
+    border-top: 1px dotted black;
+    border-left: 1px dotted black;
+    display: block;
+    position: relative;
+    top: 50%;
+    margin-left: -17px; */
+}
+
+.leaflet-gislayers-baselayer {
+  padding-left: 17px;
+}

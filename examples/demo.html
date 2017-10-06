@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<title>Demo GIS Layers</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	<link rel="stylesheet" href="../src/leaflet.css" />
+	<script src="../src/leaflet-src.js"></script>
+	
+	<link rel="stylesheet" href="../src/leaflet.gislayers.css" />
+	<script src="../src/leaflet.gislayers.js"></script>
+
+	<style>
+		body {
+			padding: 0;
+			margin: 0;
+		}
+
+		html,
+		body,
+		#map {
+			height: 100%;
+			width: 100%;
+		}
+
+		/* .test {
+			width: 300px;
+			height: 100%;
+		} */
+	</style>
+
+</head>
+
+<body>
+
+
+
+	<div id="map"></div>
+	<script>
+
+
+		var mapbox = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+			maxZoom: 18,
+			id: 'mapbox.streets'
+		});
+
+		var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+			maxZoom: 18,
+			id: 'osm'
+		});
+
+		var dkm = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'dkm'
+		});
+
+		var access1 = L.tileLayer.wms('http://tileserver.rimo-saas.com:8080/geoserver/RiMo/wms', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: 'RiMo:BMVIT_access1',
+			id: 'access1'
+		});
+
+		var access2 = L.tileLayer.wms('http://tileserver.rimo-saas.com:8080/geoserver/RiMo/wms', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: 'RiMo:BMVIT_access2',
+			id: 'access2'
+		});
+
+
+		var leerverrohrung2 = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'leerv2'
+		});
+
+		var leerverrohrung1 = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'leerv1'
+		});
+
+		var leerverrohrung3 = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'leerv3'
+		});
+
+		var leerverrohrung4 = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'leerv4'
+		});
+
+		var landesgrenze = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'landesg'
+		});
+
+		var random = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
+			maxZoom: 18,
+			opacity: 0.6,
+			layers: '3',
+			id: 'random'
+		});
+
+		var geojson = L.geoJSON({
+			"type": "FeatureCollection",
+			"features": [
+				{
+					"type": "Feature",
+					"properties": {},
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [
+							[
+								[
+									15.380859374999998,
+									48.516604348867475
+								],
+								[
+									14.501953124999998,
+									47.989921667414194
+								],
+								[
+									15.644531250000002,
+									47.754097979680026
+								],
+								[
+									16.083984375,
+									48.16608541901253
+								],
+								[
+									16.435546875,
+									48.40003249610685
+								],
+								[
+									15.732421875,
+									48.80686346108517
+								],
+								[
+									15.380859374999998,
+									48.516604348867475
+								]
+							]
+						]
+					}
+				},
+				{
+					"type": "Feature",
+					"properties": {},
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [
+							[
+								[
+									16.19384765625,
+									48.122101028190805
+								],
+								[
+									16.19384765625,
+									48.122101028190805
+								],
+								[
+									16.19384765625,
+									48.122101028190805
+								],
+								[
+									16.19384765625,
+									48.122101028190805
+								]
+							]
+						]
+					}
+				},
+				{
+					"type": "Feature",
+					"properties": {},
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [
+							[
+								[
+									16.32568359375,
+									47.923704717745686
+								],
+								[
+									16.732177734375,
+									47.923704717745686
+								],
+								[
+									16.732177734375,
+									48.16608541901253
+								],
+								[
+									16.32568359375,
+									48.16608541901253
+								],
+								[
+									16.32568359375,
+									47.923704717745686
+								]
+							]
+						]
+					}
+				},
+				{
+					"type": "Feature",
+					"properties": {},
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [
+							[
+								[
+									16.34765625,
+									48.531157010976706
+								],
+								[
+									16.556396484375,
+									48.531157010976706
+								],
+								[
+									16.556396484375,
+									48.62564740882851
+								],
+								[
+									16.34765625,
+									48.62564740882851
+								],
+								[
+									16.34765625,
+									48.531157010976706
+								]
+							]
+						]
+					}
+				}
+			]
+		}, {
+			style: function (feature) {
+						return {color: feature.properties.color};
+				}
+		});
+
+		const map = L.map('map', {
+			zoomControl: false,
+			layers: [mapbox, dkm, access1]
+		}).setView([48, 15], 13);
+
+		L.control.zoom({
+			zoomInText: 'I',
+			zoomOutText: 'O'
+		}).addTo(map);
+
+		let layerControl = L.control.gisLayers(
+			{ 
+				'Mapbox': mapbox, 
+				'OSM': osm 
+			},
+			{
+				'GOV': { 
+					'DKM': dkm
+					// 'access1': access1,
+					// 'access2': access2
+				},
+				'BMVIT': {
+					'Leerverrohrung1': leerverrohrung1,
+					'Leerverrohrung2': leerverrohrung2
+				},
+				'test': {
+					// 'Leerverrohrung3': leerverrohrung3,
+					'access1': access1,
+					'foo': {
+						'bar': {
+							'testt': {
+								'json': geojson,
+								'json2': geojson
+							}
+						},
+						// 'Leerverrohrung4': leerverrohrung4
+						'access2': access2
+					}
+				},
+				'randomData': random
+			}
+		).addTo(map).expand();
+	</script>
+
+
+
+</body>
+
+</html>

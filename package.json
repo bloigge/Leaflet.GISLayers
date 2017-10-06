@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "leaflet.gislayers.js",
-  "scripts": {
-  },
+  "scripts": {},
   "peerDependencies": {
     "leaflet": "^1.2.0"
   },
@@ -22,5 +21,6 @@
   "bugs": {
     "url": "https://github.com/bloigge/Leaflet.GISLayers/issues"
   },
-  "homepage": "https://github.com/bloigge/Leaflet.GISLayers#readme"
+  "homepage": "https://github.com/bloigge/Leaflet.GISLayers#readme",
+  "dependencies": {}
 }
