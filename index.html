@@ -269,36 +269,99 @@
 		}).addTo(map);
 
 		let layerControl = L.control.gisLayers(
-			{ 
-				'Mapbox': mapbox, 
-				'OSM': osm 
-			},
-			{
-				'GOV': { 
-					'DKM': dkm
-					// 'access1': access1,
-					// 'access2': access2
-				},
-				'BMVIT': {
-					'Leerverrohrung1': leerverrohrung1,
-					'Leerverrohrung2': leerverrohrung2
-				},
-				'test': {
-					// 'Leerverrohrung3': leerverrohrung3,
-					'access1': access1,
-					'foo': {
-						'bar': {
-							'testt': {
-								'json': geojson,
-								'json2': geojson
-							}
-						},
-						// 'Leerverrohrung4': leerverrohrung4
-						'access2': access2
-					}
-				},
-				'randomData': random
-			}
+			
+			[  
+				 {  
+						"Mapbox":mapbox
+				 },
+				 {  
+						"OSM":osm
+				 }
+			],
+			[  
+				 {  
+						"GOV":[  
+							 {  
+									"DKM":dkm
+							 }
+						]
+				 },
+				 {  
+						"BMVIT":[  
+							 {  
+									"Leerverrohrung1":leerverrohrung1
+							 },
+							 {  
+									"Leerverrohrung2":leerverrohrung2
+							 },
+							 {  
+									"Leerverrohrung3":leerverrohrung2
+							 }
+						]
+				 },
+				 {  
+						"test":[  
+							 {  
+									"access1":access1
+							 },
+							 {  
+									"foo":[  
+										 {  
+												"bar":[  
+													 {  
+															"testt":[  
+																 {  
+																		"json":geojson
+																 },
+																 {  
+																		"json2":geojson
+																 }
+															]
+													 }
+												]
+										 },
+	 
+									]
+							 }
+						]
+				 },
+				 {  
+						"randomData":random
+				 }
+			]
+
+
+			// { 
+			// 	'Mapbox': mapbox, 
+			// 	'OSM': osm 
+			// },
+			// {
+			// 	'GOV': { 
+			// 		'DKM': dkm
+			// 		// 'access1': access1,
+			// 		// 'access2': access2
+			// 	},
+			// 	'BMVIT': {
+			// 		'Leerverrohrung1': leerverrohrung1,
+			// 		'Leerverrohrung2': leerverrohrung2,
+			// 		'Leerverrohrung3': leerverrohrung2
+			// 	},
+			// 	'test': {
+			// 		// 'Leerverrohrung3': leerverrohrung3,
+			// 		'access1': access1,
+			// 		'foo': {
+			// 			'bar': {
+			// 				'testt': {
+			// 					'json': geojson,
+			// 					'json2': geojson
+			// 				}
+			// 			},
+			// 			// 'Leerverrohrung4': leerverrohrung4
+			// 			'access2': access2
+			// 		}
+			// 	},
+			// 	'randomData': random
+			// }
 		).addTo(map).expand();
 	</script>
 

@@ -22,6 +22,7 @@
 
 
         initialize: function (baseLayers, overlays, options) {
+            console.log(arguments)
             L.setOptions(this, options);
 
             this._layerControlInputs = [];
@@ -35,17 +36,22 @@
         },
 
         _iterateLayerJson: function(json, relateTo, type) {
+           
             // Loop Json
             for (var key in json) {
                 var value = json[key];
-                if (!(value instanceof L.Layer) && typeof value == "object" && value !== null) {
+                // if (!(value instanceof L.Layer) && typeof value == "object" && value !== null) {
+                if (Object.prototype.toString.call( value ) === '[object Array]' && value !== null) {
                     var data = {
                         "name": key,
                         "overlay": type,
                         "isGroup": true
                     }
                     var aNode = this._tree.add(data, relateTo, this._tree.traverseBF);
-                    this._iterateLayerJson(value, aNode.id, type);
+                    for (var i in value) {
+                        this._iterateLayerJson(value[i], aNode.id, type);
+                    }
+                    
                 } else {
                     var data = {
                         "name": key,
@@ -310,14 +316,16 @@
                         ev.preventDefault();
                         var id = ev.dataTransfer.types[0];
                         var aNode = self._tree.getNodeById(id);
-                        if (this.isAllowedToBeDroppedOnBy(aNode, ev)) {
+                        if (this.isDroppable(aNode, ev)) {
                             this.resetOnHoverStyle(ev);
-                            console.log(this);
-                            console.log(aNode)
-                            
-                            this.tree.add(aNode.data, this.id, this.tree.traverseDF);
-                            this.tree.remove(aNode.data, aNode.parent.id, this.tree.traverseDF);
-
+                            if (this.isHiddenLine(ev)) {
+                                var aParent = this.moveNode.call(this.parent, aNode);
+                                aParent.children.splice(aParent.children.indexOf(this), 0, aParent.children.splice(aParent.children.indexOf(aNode), 1)[0]);
+                                self._update();
+                            } else {
+                                this.moveNode.call(this, aNode);
+                                self._update();
+                            }
                         } else {
                             ev.dataTransfer.dropEffect = "none";
                         }
@@ -327,7 +335,7 @@
                         ev.preventDefault();
                         var id = ev.dataTransfer.types[0];
                         var aNode = self._tree.getNodeById(id);
-                        if (this.isAllowedToBeDroppedOnBy(aNode, ev)) {
+                        if (this.isDroppable(aNode, ev)) {
                             this.setOnHoverStyle(ev);
                         } else {
                             ev.dataTransfer.dropEffect = "none";
@@ -350,17 +358,20 @@
                     },
 
                     createBaseMapElement: function(ref) {
+                        var inputs = [];
                         var obj = this.data;
                         var label = this.createLabelElement();
                         var holder = document.createElement('div');
                         holder.id = this.id;
                         holder.className += ' gislayer-node';
-                        input = self._createRadioElement('leaflet-base-layers', self._map.hasLayer(obj.layer));
+                        input = self._createRadioElement('leaflet-base-layers selector-box', self._map.hasLayer(obj.layer));
+                        inputs.push(input);
                         var name = this.createNameElement(' ' + obj.name);
                         return this.createNodeElement(holder, null, label, input, name, ref);            
                     },
 
                     createLayerElement: function(ref) {
+                        var inputs = [];
                         var obj = this.data;
                         var label = this.createLabelElement();
                         var holder = this.createHolderElement();
@@ -370,14 +381,15 @@
                         var input = document.createElement('input');
                         input.type = 'checkbox';
                         input.classList += 'node-checkbox';
-                        input.className = 'leaflet-control-layers-selector tree-guide';
+                        input.className = 'leaflet-control-layers-selector tree-guide selector-box';
                         input.defaultChecked = self._map.hasLayer(obj.layer);
                         input.layerId = L.Util.stamp(obj.layer);
                         self._layerControlInputs.push(input);
                         L.DomEvent.on(input, 'click', self._onInputClick, self);
                         L.DomEvent.on(input, 'click', this.layerClick, this);
+                        inputs.push[input];
             
-                        // Create name
+                        // Create Name
                         var name = this.createNameElement(' ' + obj.name);
                         
                         // Create Final DOM Element
@@ -385,17 +397,24 @@
                     },
 
                     createGroupElement: function(ref) {
+                        var inputs = [];
                         var obj = this.data;
                         var label = this.createLabelElement();
                         var holder = this.createHolderElement();
                         var hidden = this.createHiddenElement();
 
+                        // Create GroupInput
+                        var groupinput = document.createElement('input');
+                        groupinput.className = 'leaflet-control-layers-selector grouping-box';
+                        groupinput.type = 'checkbox';
+
+
                         // Create Input
                         var input = document.createElement('input');
                         input.type = 'checkbox';
-                        input.className = 'leaflet-control-layers-selector tree-guide';
+                        input.className = 'leaflet-control-layers-selector tree-guide selector-box';
                         L.DomEvent.on(input, 'click', this.groupClick, this);
-                            
+
                         // Create Name
                         var name = this.createNameElement(self.options.groupSymbol + obj.name);
 
@@ -403,7 +422,10 @@
                         return this.createNodeElement(holder, hidden, label, input, name, ref); 
                     },
 
-                    createNodeElement: function(holder, hidden, label, input, name, ref) {
+                    createNodeElement: function(holder, hidden, label, input, name, ref, groupinput) {
+                        if (groupinput) {
+                            holder.appendChild(groupinput);
+                        }
                         holder.appendChild(input);
                         holder.appendChild(name);
                         if (hidden) {
@@ -486,7 +508,7 @@
                     },
 
                     getInputBox: function() {
-                        return this.domRef.getElementsByTagName("input")[0];
+                        return this.domRef.getElementsByClassName("selector-box")[0];
                     },
     
                     getState: function() {
@@ -514,7 +536,7 @@
 
                     resetOnHoverStyle: function(ev) {
                         var elem;
-                        if (this.dropElementIsHiddenLine(ev)) {
+                        if (this.isHiddenLine(ev)) {
                             elem = ev.target;
                         } else {
                             elem = this.domRef.children[1];
@@ -524,7 +546,7 @@
 
                     setOnHoverStyle: function(ev) {
                         var elem;
-                        if (this.dropElementIsHiddenLine(ev)) {
+                        if (this.isHiddenLine(ev)) {
                             elem = ev.target;
                         } else {
                             elem = this.domRef.children[1];
@@ -532,23 +554,15 @@
                         elem.style.backgroundColor = this.getNodeHoverColor();                        
                     },
 
-                    dropElementIsHiddenLine: function(ev) {
+                    isHiddenLine: function(ev) {
                         return ev.target.classList.contains('hidden-line') 
                     },
 
-                    isAllowedToBeDroppedOnBy: function(dragingNode, ev) {
-                        if (this.dropElementIsHiddenLine(ev)) {
-                            return true
-                        }
-
-                        if (this.isLayer()) {
-                            return false
-                        }
-
+                    isDroppable: function(dragingNode, ev) {
                         if (dragingNode === this) {
                             return false
                         }
-    
+                        
                         if (dragingNode.isGroup()) {
                             if (this.tree.checkIfIsChild(dragingNode, this)) {
                                 return false
@@ -556,10 +570,28 @@
                                 return true
                             }
                         }
+                        
+                        if (this.isHiddenLine(ev)) {
+                            return true
+                        }
+                        
+                        if (this.isLayer()) {
+                            return false
+                        }
+
 
                         return true
-                    }                     
-
+                    },
+                    
+                    moveNode: function(aNode) {
+                        var aParent = this;
+                        var aParentId = aParent.id;
+                        var oldNodeParentId = aNode.parent.id;
+                        var oldParent = this.tree.getNodeById(oldNodeParentId);
+                        oldParent.children.splice(oldParent.children.indexOf(aNode), 1);
+                        this.tree.add(aNode, aParentId, this.tree.traverseDF);
+                        return this
+                    }                    
                 };
 
                 Node.init = function(data, id, tree) {
@@ -674,7 +706,6 @@
                             var zIndex = parseFloat(i) + 1;
                             var aLayer = overlays[i];
                             aLayer.getLeafletLayer().setZIndex(zIndex);
-                            // console.log(aLayer.getName() + ' ' + zIndex)
                         }
                     },
 
@@ -688,6 +719,23 @@
                             }
                         }
                         return isInGroup
+                    },
+
+                    generateJson: function(selectedNode, json) {
+                        return (function loopChildren(currentNode, obj) {
+                            for (var i in currentNode.children) {
+                                var aNode = currentNode.children[i];
+                                if (aNode.isGroup()) {
+                                    var newGroup = [];
+                                    var aNewObj = {[aNode.data.name]:  newGroup};
+                                    obj.push(aNewObj)                                  
+                                    loopChildren(aNode, newGroup);
+                                } else {
+                                    obj.push({[aNode.data.name]: aNode.data.layer})
+                                }
+                            }
+                            return obj
+                        }(selectedNode, json))
                     },
 
                     getGroupElements: function(selectedNode) {
@@ -817,8 +865,8 @@
                     },
 
                     add: function (data, toData, traversal) {
-                        var child = self.Node(data, this.createUniqueID(), this),
-                            parent = null,
+                        var child = (data instanceof self.Node) ? data : self.Node(data, this.createUniqueID(), this);
+                        var parent = null,
                             callback = function (node) {
                                 if (node.id === toData) {
                                     parent = node;
@@ -826,14 +874,12 @@
                             };
 
                         this.contains(callback, traversal);
-
                         if (parent) {
                             parent.children.push(child);
                             child.parent = parent;
                         } else {
                             throw new Error('Cannot add node to a non-existent parent.');
                         }
-
                         return child
                     },
 
@@ -931,7 +977,32 @@
             }
     
             this._expandIfNotCollapsed();
-        }
+        },
+
+        _addBasemapLayer: function (layer, name, overlay) {
+            if (this._map) {
+                layer.on('add remove', this._onLayerChange, this);
+            }
+    
+            this._layers.push({
+                layer: layer,
+                name: name,
+                overlay: overlay
+            });
+    
+            if (this.options.sortLayers) {
+                this._layers.sort(bind(function (a, b) {
+                    return this.options.sortFunction(a.layer, b.layer, a.name, b.name);
+                }, this));
+            }
+    
+            if (this.options.autoZIndex && layer.setZIndex) {
+                this._lastZIndex++;
+                layer.setZIndex(this._lastZIndex);
+            }
+    
+            this._expandIfNotCollapsed();
+        }      
 
     });
 
