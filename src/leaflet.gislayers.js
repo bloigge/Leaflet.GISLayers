@@ -14,6 +14,47 @@
     }
 })(function (L) {
 
+
+    // L.Layer.addInitHook(function(){
+    //     if (this.options)
+    //     var uid = L.Util.stamp(this);
+    //     console.log(this);
+    //     L.Util.setOptions(this, {
+    //         pane: 'pane_' + uid
+    //     });
+    // });
+
+    L.Map.include({
+        addLayer: function (layer) {
+            if (layer.options.singlePane) {
+                var aPaneName = layer.options.paneName;
+                var aPane = this.getPane(aPaneName) ? this.getPane(aPaneName) : this.createPane(aPaneName);
+                aPane.style.zIndex = 300;
+                layer.options.pane = aPaneName;
+            }
+
+            if (!layer._layerAdd) {
+                throw new Error('The provided object is not a Layer.');
+            }
+
+            var id = L.Util.stamp(layer);
+            if (this._layers[id]) { return this; }
+            this._layers[id] = layer;
+    
+            layer._mapToAdd = this;
+    
+            if (layer.beforeAdd) {
+                layer.beforeAdd(this);
+            }
+
+            this.whenReady(layer._layerAdd, layer);
+    
+            return this;
+        }
+    });
+
+
+
     L.Control.GisLayers = L.Control.Layers.extend({
         options: {
             'collapsed': false,
@@ -22,44 +63,50 @@
 
 
         initialize: function (baseLayers, overlays, options) {
-            console.log(arguments)
-            L.setOptions(this, options);
+            var self = this;
+            L.Util.setOptions(this, options);
+
+            if (this.options.geojsonEqual) {
+
+            }
 
             this._layerControlInputs = [];
             this._layers = [];
             this._lastZIndex = 0;
             this._handlingClick = false;
             this._tree = window.aTree = this._createTree();
-            this._iterateLayerJson({"baseLayers": baseLayers}, "root");
-            this._iterateLayerJson({"overlays": overlays}, "root", true);
-            
+            this._iterateLayerJson({"data": baseLayers, "name": "Baselayers"}, "root");
+            this._iterateLayerJson({"data": overlays, "name": "Overlays"}, "root", true);
         },
 
         _iterateLayerJson: function(json, relateTo, type) {
            
             // Loop Json
             for (var key in json) {
-                var value = json[key];
-                // if (!(value instanceof L.Layer) && typeof value == "object" && value !== null) {
-                if (Object.prototype.toString.call( value ) === '[object Array]' && value !== null) {
-                    var data = {
-                        "name": key,
-                        "overlay": type,
-                        "isGroup": true
+                if (key === "data") {
+                    var value = json.data;
+                    var name = json.name;
+                    if (Object.prototype.toString.call( value ) === '[object Array]' && value !== null) {
+                        var data = {
+                            "name": name,
+                            "overlay": type,
+                            "isGroup": true,
+                            "grouped": json.grouped
+                        }
+                        var aNode = this._tree.add(data, relateTo, this._tree.traverseBF);
+                        for (var i in value) {
+                            this._iterateLayerJson(value[i], aNode.id, type);
+                        }
+                        
+                    } else {
+                        var data = {
+                            "name": name,
+                            "layer": value,
+                            "overlay": type
+                        }
+                        var aNode = this._tree.add(data, relateTo, this._tree.traverseBF);
+                        this._addLayer(value, name, type);
                     }
-                    var aNode = this._tree.add(data, relateTo, this._tree.traverseBF);
-                    for (var i in value) {
-                        this._iterateLayerJson(value[i], aNode.id, type);
-                    }
-                    
-                } else {
-                    var data = {
-                        "name": key,
-                        "layer": value,
-                        "overlay": type
-                    }
-                    var aNode = this._tree.add(data, relateTo, this._tree.traverseBF);
-                    this._addLayer(value, key, type);
                 }
             }
         },
@@ -170,11 +217,11 @@
                     },
     
                     isOverlayGroup: function() {
-                        return (this.data.name === 'overlays') ? true : false;
+                        return (this.data.name === 'Overlays') ? true : false;
                     },
     
                     isBaseLayerGroup: function() {
-                        return (this.data.name === 'baseLayers') ? true : false;
+                        return (this.data.name === 'Baselayers') ? true : false;
                     },
     
                     layerIsBaseLayer: function() {
@@ -184,8 +231,9 @@
                     isGroup: function() {
                         return this.data.hasOwnProperty("isGroup")
                     },
-    
+
                     addLayerToMap:function() {
+
                         var layer = this.data.layer
                         var id = L.Util.stamp(layer)
                         var map = self._map;
@@ -222,9 +270,6 @@
                         }, layer);
                 
                         return this;
-    
-    
-                        self._map.addLayer(this.data.layer);
                     },
                     
                     removeLayerFromMap: function() {
@@ -278,14 +323,14 @@
                         }
                     },
     
-                    createLabelElement: function() {
-                        var label = document.createElement('label');
+                    createWrapperElement: function() {
+                        var wrapper = document.createElement('div');
                         if (this.isGroup()) {
-                            label.className += ' leaflet-gislayers-group';
+                            wrapper.className += ' leaflet-gislayers-group';
                         } else {
-                            label.className += (this.layerIsBaseLayer()) ? ' leaflet-gislayers-baselayer' :' leaflet-gislayers-layer';                        
+                            wrapper.className += (this.layerIsBaseLayer()) ? ' leaflet-gislayers-baselayer' :' leaflet-gislayers-layer';                        
                         }
-                        return label
+                        return wrapper
                     },                    
 
                     createHiddenElement: function() {
@@ -310,6 +355,17 @@
                         holder.ondragstart = this.onDragStart.bind(this);
 
                         return holder
+                    },
+
+                    onHideClick: function(ev) {
+                        var state = ev.target.checked ? '' : 'none';
+                        var childNodes = this.domRef.childNodes;
+                        console.log(this)
+                        for (var i = 2;  i < childNodes.length; i++) {
+                            var a = childNodes[i];
+                            a.style.display = state;
+                        }
+                        self._tree.update();
                     },
 
                     onNodeDrop: function(ev) {
@@ -351,29 +407,34 @@
                         ev.dataTransfer.setData(this.id, '');
                     },
 
-                    createNameElement: function(innerHTML) {
-                        var name = document.createElement('span');
+                    createNameElement: function(innerHTML, id) {
+                        var name = document.createElement('label');
+                        name.style = "display: inline"; 
+                        name.htmlFor = this.getInputBoxId();
                         name.innerHTML = innerHTML;                        
                         return name
                     },
 
                     createBaseMapElement: function(ref) {
-                        var inputs = [];
                         var obj = this.data;
-                        var label = this.createLabelElement();
+                        var wrapper = this.createWrapperElement();
                         var holder = document.createElement('div');
                         holder.id = this.id;
                         holder.className += ' gislayer-node';
                         input = self._createRadioElement('leaflet-base-layers selector-box', self._map.hasLayer(obj.layer));
-                        inputs.push(input);
+                        input.layerId = L.Util.stamp(obj.layer);
+                        input.id = this.getInputBoxId();
+                        self._layerControlInputs.push(input);
+                        L.DomEvent.on(input, 'click', self._onInputClick, self);
+
+                        // Create Name
                         var name = this.createNameElement(' ' + obj.name);
-                        return this.createNodeElement(holder, null, label, input, name, ref);            
+                        return this.createNodeElement(holder, null, wrapper, input, name, ref);            
                     },
 
                     createLayerElement: function(ref) {
-                        var inputs = [];
                         var obj = this.data;
-                        var label = this.createLabelElement();
+                        var wrapper = this.createWrapperElement();
                         var holder = this.createHolderElement();
                         var hidden = this.createHiddenElement();
 
@@ -384,22 +445,22 @@
                         input.className = 'leaflet-control-layers-selector tree-guide selector-box';
                         input.defaultChecked = self._map.hasLayer(obj.layer);
                         input.layerId = L.Util.stamp(obj.layer);
+                        input.id = this.getInputBoxId();
                         self._layerControlInputs.push(input);
                         L.DomEvent.on(input, 'click', self._onInputClick, self);
                         L.DomEvent.on(input, 'click', this.layerClick, this);
-                        inputs.push[input];
+                        L.DomEvent.on(input, 'click', this.tree.updateZIndex, this.tree);
             
                         // Create Name
                         var name = this.createNameElement(' ' + obj.name);
                         
                         // Create Final DOM Element
-                        return this.createNodeElement(holder, hidden, label, input, name, ref);    
+                        return this.createNodeElement(holder, hidden, wrapper, input, name, ref);    
                     },
 
                     createGroupElement: function(ref) {
-                        var inputs = [];
                         var obj = this.data;
-                        var label = this.createLabelElement();
+                        var wrapper = this.createWrapperElement();
                         var holder = this.createHolderElement();
                         var hidden = this.createHiddenElement();
 
@@ -412,29 +473,39 @@
                         // Create Input
                         var input = document.createElement('input');
                         input.type = 'checkbox';
+                        input.id = this.getInputBoxId();
                         input.className = 'leaflet-control-layers-selector tree-guide selector-box';
                         L.DomEvent.on(input, 'click', this.groupClick, this);
 
                         // Create Name
                         var name = this.createNameElement(self.options.groupSymbol + obj.name);
 
+                        // Create Toggle Mode Button
+                        var toggleButton = document.createElement('input');
+                        toggleButton.type = 'checkbox';
+                        toggleButton.className = 'leaflet-control-layers-selector leaflet-gislayers-toggle-box';
+                        toggleButton.onclick = this.onHideClick.bind(this);
+                        holder.appendChild(toggleButton)
+
+
                         // Create Final DOM Element
-                        return this.createNodeElement(holder, hidden, label, input, name, ref); 
+                        return this.createNodeElement(holder, hidden, wrapper, input, name, ref); 
                     },
 
-                    createNodeElement: function(holder, hidden, label, input, name, ref, groupinput) {
+                    createNodeElement: function(holder, hidden, wrapper, input, name, ref, groupinput) {
                         if (groupinput) {
                             holder.appendChild(groupinput);
                         }
                         holder.appendChild(input);
                         holder.appendChild(name);
                         if (hidden) {
-                            label.appendChild(hidden);
+                            wrapper.appendChild(hidden);
                         }                        
-                        label.appendChild(holder);
-                        ref.appendChild(label);
-                        this.domRef = label;                          
-                        return label
+                        wrapper.appendChild(holder);
+                        ref.appendChild(wrapper);
+                        
+                        this.domRef = wrapper;                          
+                        return wrapper
                     },
 
                     groupClick: function(ev) {
@@ -509,6 +580,10 @@
 
                     getInputBox: function() {
                         return this.domRef.getElementsByClassName("selector-box")[0];
+                    },
+
+                    getInputBoxId: function() {
+                        return this.id + '_inputbox';
                     },
     
                     getState: function() {
@@ -693,20 +768,22 @@
                     },
 
                     updateZIndex: function() {
-                        // Basemaps ZIndex always 1
-                        var basemaps = this.getGroupLayerDF(this.getOverlays()).reverse();
-                        for (var i in basemaps) {
-                            var aLayer = basemaps[i];
-                            aLayer.getLeafletLayer().setZIndex(1);
-                        }                        
-
                         // Overlays in Order
                         var overlays = this.getGroupLayerDF(this.getOverlays()).reverse();
                         for (var i in overlays) {
                             var zIndex = parseFloat(i) + 1;
                             var aLayer = overlays[i];
-                            aLayer.getLeafletLayer().setZIndex(zIndex);
+                            var leafletLayer = aLayer.getLeafletLayer()
+                            if (self._map.hasLayer(leafletLayer)) {
+                                leafletLayer.bringToFront();
+                            }
                         }
+                    },
+
+                    getZIndexOfElement: function (e) {      
+                        var z = window.document.defaultView.getComputedStyle(e).getPropertyValue('z-index');
+                        if (isNaN(z)) return window.getZIndex(e.parentNode);
+                        return z; 
                     },
 
                     checkIfIsChild: function(selectedNode, toBeChecked) {
@@ -952,13 +1029,14 @@
                 }
             )
 
-        },
+        },       
 
         _addLayer: function (layer, name, overlay) {
+            
             if (this._map) {
                 layer.on('add remove', this._onLayerChange, this);
             }
-    
+            myLayer = layer;
             this._layers.push({
                 layer: layer,
                 name: name,

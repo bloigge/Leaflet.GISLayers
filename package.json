@@ -4,7 +4,7 @@
   "description": "",
   "main": "leaflet.gislayers.js",
   "scripts": {
-    "start": "lite-server"
+    "start": "lite-server -c bs-config.json"
   },
   "peerDependencies": {
     "leaflet": "^1.2.0"

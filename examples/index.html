@@ -30,10 +30,7 @@
 			width: 100%;
 		}
 
-		/* .test {
-			width: 300px;
-			height: 100%;
-		} */
+
 	</style>
 
 </head>
@@ -41,21 +38,26 @@
 <body>
 
 
-
 	<div id="map"></div>
 	<script>
-
+		
+		const map = L.map('map', {
+			zoomControl: false
+		}).setView([47.5, 16], 8);
 
 		var mapbox = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
 			maxZoom: 18,
 			id: 'mapbox.streets'
 		});
-
+		
 		var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 			maxZoom: 18,
 			id: 'osm'
-		});
+		}).addTo(map);
+		
 
+		
+		
 		var dkm = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
 			maxZoom: 18,
 			opacity: 0.6,
@@ -77,6 +79,8 @@
 			id: 'access2'
 		});
 
+		var latlngs = [[48,15],[48,16],[49,17],[49,14]];
+		var polygon = L.polygon(latlngs, {color: 'red'}).addTo(map);
 
 		var leerverrohrung2 = L.tileLayer.wms('https://wsa.bev.gv.at/GeoServer/Interceptor/Wms/CP/INSPIRE_KUNDEN-17fed6dd-dbfe-4a95-86a0-db90ec896f25', {
 			maxZoom: 18,
@@ -117,10 +121,117 @@
 			maxZoom: 18,
 			opacity: 0.6,
 			layers: '3',
-			id: 'random'
+			id: 'random',
+			singlePane: true
 		});
 
-		var geojson = L.geoJSON({
+
+
+
+		var geojson1 = L.geoJSON({
+			"type": "FeatureCollection",
+			"features": [
+				{
+					"type": "Feature",
+					"properties": {"color": "green"},
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [
+							[
+								[
+									15.5511474609375,
+									48.046873823967154
+								],
+								[
+									15.292968749999998,
+									47.92554522341879
+								],
+								[
+									15.3973388671875,
+									47.76886840424207
+								],
+								[
+									15.641784667968748,
+									47.69682297134991
+								],
+								[
+									16.07025146484375,
+									47.80024163283363
+								],
+								[
+									15.80657958984375,
+									48.090922612296744
+								],
+								[
+									15.5511474609375,
+									48.046873823967154
+								]
+							]
+						]
+					}
+				}
+			]
+		}, {
+			style: function (feature) {
+						return {
+							color: feature.properties.color,
+							fillOpacity: 1
+						};
+				}
+		}).bindPopup(function (layer) {
+				return 'green';
+		});
+
+
+		var geojson2 = L.geoJSON({
+			"type": "FeatureCollection",
+			"features": [
+				{
+					"type": "Feature",
+					"properties": {"color":"#0071ce"},
+					"geometry": {
+						"type": "Polygon",
+						"coordinates": [
+							[
+								[
+									15.724182128906248,
+									48.08174889040687
+								],
+								[
+									14.842529296875,
+									47.299721913179944
+								],
+								[
+									16.38336181640625,
+									47.2736386488847
+								],
+								[
+									15.790100097656248,
+									48.08358376568458
+								],
+								[
+									15.724182128906248,
+									48.08174889040687
+								]
+							]
+						]
+					}
+				}
+			]
+		}, {
+			style: function (feature) {
+						return {
+							color: feature.properties.color,
+							fillOpacity: 1
+						};
+				}
+		}).bindPopup(function (layer) {
+				return 'blue';
+		});		
+
+		var geojson3Pane = map.getPane("geojson3");
+		
+		var geojson3 = L.geoJSON({
 			"type": "FeatureCollection",
 			"features": [
 				{
@@ -131,32 +242,36 @@
 						"coordinates": [
 							[
 								[
-									15.380859374999998,
-									48.516604348867475
+									13.9306640625,
+									47.96785877999251
+								],
+								[
+									13.6669921875,
+									47.55428670127958
+								],
+								[
+									14.150390625,
+									47.286681888764214
+								],
+								[
+									14.688720703124998,
+									47.5913464767971
+								],
+								[
+									14.688720703124998,
+									47.79101617826261
 								],
 								[
 									14.501953124999998,
-									47.989921667414194
+									47.908978314728714
 								],
 								[
-									15.644531250000002,
-									47.754097979680026
+									14.381103515624998,
+									48.004625021133904
 								],
 								[
-									16.083984375,
-									48.16608541901253
-								],
-								[
-									16.435546875,
-									48.40003249610685
-								],
-								[
-									15.732421875,
-									48.80686346108517
-								],
-								[
-									15.380859374999998,
-									48.516604348867475
+									13.9306640625,
+									47.96785877999251
 								]
 							]
 						]
@@ -170,20 +285,24 @@
 						"coordinates": [
 							[
 								[
-									16.19384765625,
-									48.122101028190805
+									15.2490234375,
+									47.45037978769006
 								],
 								[
-									16.19384765625,
-									48.122101028190805
+									16.10595703125,
+									47.45037978769006
 								],
 								[
-									16.19384765625,
-									48.122101028190805
+									16.10595703125,
+									47.89424772020999
 								],
 								[
-									16.19384765625,
-									48.122101028190805
+									15.2490234375,
+									47.89424772020999
+								],
+								[
+									15.2490234375,
+									47.45037978769006
 								]
 							]
 						]
@@ -193,75 +312,19 @@
 					"type": "Feature",
 					"properties": {},
 					"geometry": {
-						"type": "Polygon",
+						"type": "Point",
 						"coordinates": [
-							[
-								[
-									16.32568359375,
-									47.923704717745686
-								],
-								[
-									16.732177734375,
-									47.923704717745686
-								],
-								[
-									16.732177734375,
-									48.16608541901253
-								],
-								[
-									16.32568359375,
-									48.16608541901253
-								],
-								[
-									16.32568359375,
-									47.923704717745686
-								]
-							]
-						]
-					}
-				},
-				{
-					"type": "Feature",
-					"properties": {},
-					"geometry": {
-						"type": "Polygon",
-						"coordinates": [
-							[
-								[
-									16.34765625,
-									48.531157010976706
-								],
-								[
-									16.556396484375,
-									48.531157010976706
-								],
-								[
-									16.556396484375,
-									48.62564740882851
-								],
-								[
-									16.34765625,
-									48.62564740882851
-								],
-								[
-									16.34765625,
-									48.531157010976706
-								]
-							]
+							15.1171875,
+							48.17341248658084
 						]
 					}
 				}
 			]
-		}, {
-			style: function (feature) {
-						return {color: feature.properties.color};
-				}
-		});
+		}).bindPopup(function (layer) {
+				return 'multi';
+		});		
 
-		const map = L.map('map', {
-			zoomControl: false,
-			layers: [mapbox, dkm, access1]
-		}).setView([48, 15], 13);
+
 
 		L.control.zoom({
 			zoomInText: 'I',
@@ -272,97 +335,101 @@
 			
 			[  
 				 {  
-						"Mapbox":mapbox
+						"data": mapbox,
+						"name": "Mapbox"
 				 },
 				 {  
-						"OSM":osm
+						"data": osm,
+						"name": "OSM"
 				 }
 			],
 			[  
 				 {  
-						"GOV":[  
+						"data": [  
 							 {  
-									"DKM":dkm
+									"data": dkm,
+									"name": "DKM"
+							 },
+							 {
+								 "data": polygon,
+								 "name": "Polygon"
 							 }
-						]
+						],
+						"name": "GOV",
+						"grouped": true
 				 },
 				 {  
-						"BMVIT":[  
+						"data":[  
 							 {  
-									"Leerverrohrung1":leerverrohrung1
+									"data": leerverrohrung1,
+									"name": "Leerverrohrung1"
 							 },
 							 {  
-									"Leerverrohrung2":leerverrohrung2
+									"data": leerverrohrung2,
+									"name": "Leerverrohrung2"
 							 },
 							 {  
-									"Leerverrohrung3":leerverrohrung2
+									"data": leerverrohrung2,
+									"name": "Leerverrohrung3"
 							 }
-						]
+						],
+						"name": "BMVIT"
 				 },
 				 {  
-						"test":[  
+						"data":[  
 							 {  
-									"access1":access1
+									"data": access1,
+									"name": "access1"
 							 },
 							 {  
-									"foo":[  
+									"data":[  
 										 {  
-												"bar":[  
-													 {  
-															"testt":[  
+												"data":[
+													{
+															"data": [
+																{
+																	"data": geojson2,
+																	"name": "blau"
+																}
+															],
+															"name": "bluegroup"
+													},
+													{  
+															"data":[  
 																 {  
-																		"json":geojson
-																 },
-																 {  
-																		"json2":geojson
+																		"data": geojson1,
+																		"name": "grün"
 																 }
-															]
-													 }
-												]
+															],
+															"name": "greengroup"
+													},
+													{
+														"data": [
+															{
+																"data": geojson3,
+																"name": "multi"
+															}
+														],
+														"name": "multigroup"
+													}
+												],
+												"name": "bar"
 										 },
 	 
-									]
+									],
+									"name": "test"
 							 }
-						]
+						],
+						"name": "test"
 				 },
 				 {  
-						"randomData":random
+						"data": random,
+						"name": "randomData"
 				 }
 			]
-
-
-			// { 
-			// 	'Mapbox': mapbox, 
-			// 	'OSM': osm 
-			// },
-			// {
-			// 	'GOV': { 
-			// 		'DKM': dkm
-			// 		// 'access1': access1,
-			// 		// 'access2': access2
-			// 	},
-			// 	'BMVIT': {
-			// 		'Leerverrohrung1': leerverrohrung1,
-			// 		'Leerverrohrung2': leerverrohrung2,
-			// 		'Leerverrohrung3': leerverrohrung2
-			// 	},
-			// 	'test': {
-			// 		// 'Leerverrohrung3': leerverrohrung3,
-			// 		'access1': access1,
-			// 		'foo': {
-			// 			'bar': {
-			// 				'testt': {
-			// 					'json': geojson,
-			// 					'json2': geojson
-			// 				}
-			// 			},
-			// 			// 'Leerverrohrung4': leerverrohrung4
-			// 			'access2': access2
-			// 		}
-			// 	},
-			// 	'randomData': random
-			// }
-		).addTo(map).expand();
+		, {
+			"geojsonEqual": true
+		}).addTo(map).expand();
 	</script>
 
 

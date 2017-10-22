@@ -1,5 +1,6 @@
 .leaflet-gislayers-group {
   padding-left: 17px;
+  border-left: 1px solid black;
 }
 
 .grouping-box {
@@ -13,7 +14,10 @@
   /* border-left: 1px dotted black; */
 }
 
-
+.leaflet-gislayers-toggle-box {
+  right: 0px; 
+  margin-right: 0px;
+}
 
 .tree-guide::after {
     /* content: '';
