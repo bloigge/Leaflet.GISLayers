@@ -58,7 +58,9 @@
     L.Control.GisLayers = L.Control.Layers.extend({
         options: {
             'collapsed': false,
-            'groupSymbol': '<i class="fa fa-object-group" aria-hidden="true"></i> '
+            // 'groupSymbol': '<i class="fa fa-object-group" aria-hidden="true"></i> '
+            // 'groupSymbol': '<span>GROUP: </span>'
+            'groupSymbol': ' '
         },
 
 
@@ -423,7 +425,7 @@
                         var holder = document.createElement('div');
                         holder.id = this.id;
                         holder.className += ' gislayer-node';
-                        input = self._createRadioElement('leaflet-base-layers selector-box', self._map.hasLayer(obj.layer));
+                        input = self._createRadioElement('leaflet-base-layers input-box', self._map.hasLayer(obj.layer));
                         input.layerId = L.Util.stamp(obj.layer);
                         input.id = this.getInputBoxId();
                         self._layerControlInputs.push(input);
@@ -444,7 +446,7 @@
                         var input = document.createElement('input');
                         input.type = 'checkbox';
                         input.classList += 'node-checkbox';
-                        input.className = 'leaflet-control-layers-selector tree-guide selector-box';
+                        input.className = 'leaflet-control-layers-selector tree-guide input-box';
                         input.defaultChecked = self._map.hasLayer(obj.layer);
                         input.layerId = L.Util.stamp(obj.layer);
                         input.id = this.getInputBoxId();
@@ -476,22 +478,23 @@
                         var input = document.createElement('input');
                         input.type = 'checkbox';
                         input.id = this.getInputBoxId();
-                        input.className = 'leaflet-control-layers-selector tree-guide selector-box';
+                        input.className = 'leaflet-control-layers-selector tree-guide input-box';
                         L.DomEvent.on(input, 'click', this.groupClick, this);
 
                         // Create Name
                         var name = this.createNameElement(self.options.groupSymbol + obj.name);
 
                         // Create Toggle Mode Button
-                        // var toggleWrapper = document.createElement('div');
-                        // toggleWrapper.style = "display: inline;";
                         var toggleButton = document.createElement('input');
                         toggleButton.type = 'checkbox';
+                        toggleButton.id = this.getToggleBoxId();
                         toggleButton.className = 'leaflet-control-layers-selector leaflet-gislayers-toggle-box toggle-box';
                         toggleButton.onclick = this.onHideClick.bind(this);
-                        // toggleWrapper.appendChild(toggleButton);
-                        // holder.appendChild(toggleWrapper)
+                        var toggleButtonLabel = document.createElement('label');
+                        toggleButtonLabel.htmlFor = this.getToggleBoxId();
+
                         holder.appendChild(toggleButton);
+                        holder.appendChild(toggleButtonLabel);
 
 
                         // Create Final DOM Element
@@ -588,17 +591,21 @@
                     },
 
                     getInputBox: function() {
-                        return this.domRef.getElementsByClassName("selector-box")[0];
-                    },
-
-                    getInputBoxId: function() {
-                        return this.id + '_inputbox';
+                        return this.domRef.getElementsByClassName("input-box")[0];
                     },
 
                     getToggleBox: function() {
                         return this.domRef.getElementsByClassName("toggle-box")[0];
-                    },                    
-    
+                    },
+
+                    getInputBoxId: function() {
+                        return this.id + '_selectorbox';
+                    },
+
+                    getToggleBoxId: function() {
+                        return this.id + '_togglebox';
+                    },
+
                     getState: function() {
                         return this.getInputBox().checked;
                     },
@@ -829,15 +836,23 @@
 
                     generateJson: function(selectedNode, json) {
                         return (function loopChildren(currentNode, obj) {
-                            for (var i in currentNode.children) {
-                                var aNode = currentNode.children[i];
+                            var children = currentNode.children;
+                            for (var i in children) {
+                                var aNode = children[i];
                                 if (aNode.isGroup()) {
                                     var newGroup = [];
-                                    var aNewObj = {[aNode.data.name]:  newGroup};
+                                    var aNewObj = {
+                                        "data": newGroup,
+                                        "name": aNode.data.name,
+                                        "grouped": aNode.data.grouped
+                                    };
                                     obj.push(aNewObj)                                  
                                     loopChildren(aNode, newGroup);
                                 } else {
-                                    obj.push({[aNode.data.name]: aNode.data.layer})
+                                    obj.push({
+                                        "data": aNode.data.layer,
+                                        "name": aNode.data.name,
+                                    })
                                 }
                             }
                             return obj

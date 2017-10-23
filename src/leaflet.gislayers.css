@@ -1,22 +1,33 @@
+@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css);
+
 .leaflet-gislayers-group {
   padding-left: 18px;
 }
 
 .leaflet-gislayers-layer {
-  padding-left: 18px;
+  padding-left: 17.6px;
   position: relative;
 }
 
-.leaflet-gislayers-toggle-box {
-  position: relative;
-  right: -3px;
-  top: -1px;
-  background: #999;
-  height: 10px;
-  width: 10px;
-  display: inline-block;
-  margin: 2px 6px 2px 2px;
+input[type=checkbox].leaflet-gislayers-toggle-box {
+  display: none;
 }
+
+input[type=checkbox].leaflet-gislayers-toggle-box + label {
+  display: inline-block;
+  background:url("../src/images/minus.png");
+  height: 9px;
+  width: 9px;
+  right: 0px;
+  top: -1px;
+  margin: 1px 4px 2px 4.5px;
+}
+
+input[type=checkbox].leaflet-gislayers-toggle-box:checked + label { 
+  background:url("../src/images/plus.png");
+}
+
+
 
 .leaflet-gislayers-baselayer {
   padding-left: 18px;
