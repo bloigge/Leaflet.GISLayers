@@ -24,34 +24,34 @@
     //     });
     // });
 
-    L.Map.include({
-        addLayer: function (layer) {
-            if (layer.options.singlePane) {
-                var aPaneName = layer.options.paneName;
-                var aPane = this.getPane(aPaneName) ? this.getPane(aPaneName) : this.createPane(aPaneName);
-                aPane.style.zIndex = 300;
-                layer.options.pane = aPaneName;
-            }
+    // L.Map.include({
+    //     addLayer: function (layer) {
+    //         if (layer.options.singlePane) {
+    //             var aPaneName = layer.options.paneName;
+    //             var aPane = this.getPane(aPaneName) ? this.getPane(aPaneName) : this.createPane(aPaneName);
+    //             aPane.style.zIndex = 300;
+    //             layer.options.pane = aPaneName;
+    //         }
 
-            if (!layer._layerAdd) {
-                throw new Error('The provided object is not a Layer.');
-            }
+    //         if (!layer._layerAdd) {
+    //             throw new Error('The provided object is not a Layer.');
+    //         }
 
-            var id = L.Util.stamp(layer);
-            if (this._layers[id]) { return this; }
-            this._layers[id] = layer;
+    //         var id = L.Util.stamp(layer);
+    //         if (this._layers[id]) { return this; }
+    //         this._layers[id] = layer;
     
-            layer._mapToAdd = this;
+    //         layer._mapToAdd = this;
     
-            if (layer.beforeAdd) {
-                layer.beforeAdd(this);
-            }
+    //         if (layer.beforeAdd) {
+    //             layer.beforeAdd(this);
+    //         }
 
-            this.whenReady(layer._layerAdd, layer);
+    //         this.whenReady(layer._layerAdd, layer);
     
-            return this;
-        }
-    });
+    //         return this;
+    //     }
+    // });
 
 
 
@@ -324,12 +324,19 @@
                     },
     
                     createWrapperElement: function() {
+
                         var wrapper = document.createElement('div');
                         if (this.isGroup()) {
                             wrapper.className += ' leaflet-gislayers-group';
                         } else {
                             wrapper.className += (this.layerIsBaseLayer()) ? ' leaflet-gislayers-baselayer' :' leaflet-gislayers-layer';                        
                         }
+
+                        // Create Guidelines For Togglebox
+                        // var guidelineCanvas = document.createElement("canvas");
+                        // guidelineCanvas.className += 'leaflet-gislayers-guidelines';
+                        // wrapper.appendChild(guidelineCanvas);
+
                         return wrapper
                     },                    
 
@@ -358,13 +365,8 @@
                     },
 
                     onHideClick: function(ev) {
-                        var state = ev.target.checked ? '' : 'none';
-                        var childNodes = this.domRef.childNodes;
                         console.log(this)
-                        for (var i = 2;  i < childNodes.length; i++) {
-                            var a = childNodes[i];
-                            a.style.display = state;
-                        }
+                        this.data.grouped = this.data.grouped ? false: true;
                         self._tree.update();
                     },
 
@@ -481,11 +483,15 @@
                         var name = this.createNameElement(self.options.groupSymbol + obj.name);
 
                         // Create Toggle Mode Button
+                        // var toggleWrapper = document.createElement('div');
+                        // toggleWrapper.style = "display: inline;";
                         var toggleButton = document.createElement('input');
                         toggleButton.type = 'checkbox';
-                        toggleButton.className = 'leaflet-control-layers-selector leaflet-gislayers-toggle-box';
+                        toggleButton.className = 'leaflet-control-layers-selector leaflet-gislayers-toggle-box toggle-box';
                         toggleButton.onclick = this.onHideClick.bind(this);
-                        holder.appendChild(toggleButton)
+                        // toggleWrapper.appendChild(toggleButton);
+                        // holder.appendChild(toggleWrapper)
+                        holder.appendChild(toggleButton);
 
 
                         // Create Final DOM Element
@@ -493,6 +499,8 @@
                     },
 
                     createNodeElement: function(holder, hidden, wrapper, input, name, ref, groupinput) {
+                        var outer = document.createElement("div");
+
                         if (groupinput) {
                             holder.appendChild(groupinput);
                         }
@@ -504,7 +512,8 @@
                         wrapper.appendChild(holder);
                         ref.appendChild(wrapper);
                         
-                        this.domRef = wrapper;                          
+                        this.domRef = wrapper;
+
                         return wrapper
                     },
 
@@ -585,6 +594,10 @@
                     getInputBoxId: function() {
                         return this.id + '_inputbox';
                     },
+
+                    getToggleBox: function() {
+                        return this.domRef.getElementsByClassName("toggle-box")[0];
+                    },                    
     
                     getState: function() {
                         return this.getInputBox().checked;
@@ -756,6 +769,7 @@
 
                     update: function() {
                         this.updateGroupStates();
+                        this.updateToggleState();
                         this.updateZIndex();
                     },
 
@@ -763,6 +777,21 @@
                         this.traverseDFforGroup(this.getOverlays(), function(aNode) {
                             if (!aNode.isOverlayGroup() && !aNode.isBaseLayerGroup() && aNode.isGroup()) {
                                 aNode.setGroupState(aNode.calculateGroupState());
+                            }
+                        })
+                    },
+
+                    updateToggleState: function() {
+                        this.traverseDFforGroup(this.getOverlays(), function(aNode) {
+                            if (!aNode.isOverlayGroup() && !aNode.isBaseLayerGroup() && aNode.isGroup()) {
+                                // Check toggleBox
+                                aNode.getToggleBox().checked = aNode.data.grouped;
+                                var state = aNode.data.grouped ? 'none' : '';
+                                var childNodes = aNode.domRef.childNodes;
+                                for (var i = 2;  i < childNodes.length; i++) {
+                                    var a = childNodes[i];
+                                    a.style.display = state;
+                                }
                             }
                         })
                     },
