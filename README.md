@@ -9,14 +9,18 @@ A leaflet layers control which enables drag and drop reordering and grouping of 
   - A layer is an Object which has a data and name property. The value of the data property points to a Leaflet layer.
   - A group is an Object which has a data, a name and a grouped property. The value of the data property is an array which holds Leaflet layers and/or groups.
 
-```sh
-127.0.0.1:8000
+```json
+[
+  {
+    "test": 123
+  }
+]
 ```
 
 
 ## ToDos
   - Add dotted guidelines between groups and layers
-  - Init each layer on a separate pane using a config flag (better zIndex handling for Tilelayer vs. Geojson/NonTilelayer)
+  - Init each layer on a separate pane using a config flag (better zIndex handling for tilelayer vs. geojson / non-tilelayer)
 
 
 ## Author
