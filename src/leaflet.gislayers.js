@@ -53,14 +53,10 @@
     //     }
     // });
 
-
-
     L.Control.GisLayers = L.Control.Layers.extend({
         options: {
             'collapsed': true,
             'groupSymbol': '<i class="fa fa-object-group" aria-hidden="true"></i> '
-            // 'groupSymbol': '<span>GROUP: </span>'
-            //'groupSymbol': ' '
         },
 
 
@@ -126,9 +122,6 @@
             this._tree.traverseBF(function(node) {
                 var obj = node.data;
                 node.createElement();
-                // overlaysPresent = overlaysPresent || obj.overlay;
-                // baseLayersPresent = baseLayersPresent || !obj.overlay;
-                // baseLayersCount += !obj.overlay ? 1 : 0;
             })
     
             // Hide base layers section if there's only one layer.
@@ -334,11 +327,6 @@
                             wrapper.className += (this.layerIsBaseLayer()) ? ' leaflet-gislayers-baselayer' :' leaflet-gislayers-layer';                        
                         }
 
-                        // Create Guidelines For Togglebox
-                        // var guidelineCanvas = document.createElement("canvas");
-                        // guidelineCanvas.className += 'leaflet-gislayers-guidelines';
-                        // wrapper.appendChild(guidelineCanvas);
-
                         return wrapper
                     },                    
 
@@ -367,7 +355,6 @@
                     },
 
                     onHideClick: function(ev) {
-                        console.log(this)
                         this.data.grouped = this.data.grouped ? false: true;
                         self._tree.update();
                     },
