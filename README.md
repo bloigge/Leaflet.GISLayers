@@ -4,10 +4,11 @@ A leaflet layers control which enables drag and drop reordering and grouping of 
 ## Demo  
 [Demo](https://bloigge.github.io/Leaflet.GISLayers/examples/index.html)
 
-## Configuration
+## Installation
   - L.control.gisLayers takes a config object. On the first level two arrays initialize the basemaps and overlays. 
-  - A layer is an Object which has a data and name property. 
-  - A group is an Object which has a data, a name and a grouped property. 
+  - A layer is an Object which has a data and name property. The value of the data property points to a Leaflet layer.
+  - A group is an Object which has a data, a name and a grouped property. The value of the data property is an array which holds Leaflet layers and/or groups.
+
 
 ## ToDos
   - Add dotted guidelines between groups and layers
@@ -18,3 +19,11 @@ A leaflet layers control which enables drag and drop reordering and grouping of 
 Bernd Loigge 
 
 ## License
+/*
+* ----------------------------------------------------------------------------
+* "THE BEER-WARE LICENSE" (Revision 42):
+* <phk@FreeBSD.ORG> wrote this file. As long as you retain this notice you
+* can do whatever you want with this stuff. If we meet some day, and you think
+* this stuff is worth it, you can buy me a beer in return Poul-Henning Kamp
+* ----------------------------------------------------------------------------
+*/
