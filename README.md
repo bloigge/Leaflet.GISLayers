@@ -23,13 +23,10 @@ A leaflet layers control which enables drag and drop reordering and grouping of 
 [Bernd Loigge]
 
 ## License
-
-----------------------------------------------------------------------------
 "THE BEER-WARE LICENSE" (Revision 42):
-[http://geo-service.at/]Bernd Loigge wrote this. As long as you retain this notice you
+[Bernd Loigge] wrote this. As long as you retain this notice you
 can do whatever you want with this stuff. If we meet some day, and you think
 this stuff is worth it, you can buy me a beer in return Poul-Henning Kamp
-----------------------------------------------------------------------------
 
 
-[bernd loigge]<mailto:bernd.loigge@gmx.at>
+[bernd loigge]: <mailto:bernd.loigge@gmx.at>
