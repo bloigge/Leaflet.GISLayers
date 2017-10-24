@@ -57,10 +57,10 @@
 
     L.Control.GisLayers = L.Control.Layers.extend({
         options: {
-            'collapsed': false,
-            // 'groupSymbol': '<i class="fa fa-object-group" aria-hidden="true"></i> '
+            'collapsed': true,
+            'groupSymbol': '<i class="fa fa-object-group" aria-hidden="true"></i> '
             // 'groupSymbol': '<span>GROUP: </span>'
-            'groupSymbol': ' '
+            //'groupSymbol': ' '
         },
 
 
