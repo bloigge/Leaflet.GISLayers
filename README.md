@@ -2,7 +2,7 @@
 A leaflet layers control which enables drag and drop reordering and grouping of layers.
 
 ## Demo  
-[Demo](/examples/index.html)
+[Demo](https://bloigge.github.io/Leaflet.GISLayers/examples/index.html)
 
 ## Configuration
 
